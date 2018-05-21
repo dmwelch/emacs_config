@@ -1,0 +1,9 @@
+.emacs.*
+history
+projectile.cache
+projectile-bookmarks.eld
+network-security.data
+ede-projects.el
+elpa
+eshell
+url
