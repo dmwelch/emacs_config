@@ -44,7 +44,7 @@
      ("melpa" . "http://melpa.org/packages/"))))
  '(package-selected-packages
    (quote
-    (use-package 0blayout javadoc-lookup maven-test-mode mvn scala-mode vlf logview js2-refactor projectile-speedbar rjsx-mode gh-md flycheck pomidor all-the-icons all-the-icons-dired exec-path-from-shell indium projectile nvm web-mode company json-mode js2-mode yasnippet org magit ##)))
+    (company-tern use-package 0blayout javadoc-lookup maven-test-mode mvn scala-mode vlf logview js2-refactor projectile-speedbar rjsx-mode gh-md flycheck pomidor all-the-icons all-the-icons-dired exec-path-from-shell indium projectile nvm web-mode company json-mode js2-mode yasnippet org magit ##)))
  '(prog-mode-hook (quote (linum-mode prettify-symbols-mode)))
  '(projectile-globally-ignored-files (quote ("TAGS")))
  '(show-paren-mode t)
@@ -78,7 +78,7 @@
 
 ;;(require 'package) ;; You might already have this line
 ;;;; Use the bleeding edge packages (for Jade)
-;;(add-to-list 'package-archives
+;; (add-to-list 'package-archives
 ;;             '("melpa" . "https://melpa.org/packages/"))
 ;;(when (< emacs-major-version 24)
 ;; ;; For important compatibility libraries like cl-lib
@@ -115,9 +115,9 @@
 (setq reb-re-syntax 'string)
 ;;
 (add-to-list 'load-path (expand-file-name "local" user-emacs-directory))
+
 ;; Swagger
 (require 'swagger-mode)
-(add-to-list 'load-path (expand-file-name "local/yaml-mode" user-emacs-directory))
 (require 'yaml-mode)
 
 ;;; Cucumber
@@ -127,24 +127,18 @@
 (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
 
 ;; complete anything
-;; (add-to-list 'load-path "/Users/dwelc/.nvm/versions/node/v8.6.0/lib/node_modules/tern/emacs")
+(add-to-list 'load-path "/Users/dwelc/.nvm/versions/node/v8.6.0/lib/node_modules/tern/emacs")
 (require 'company)
-;; (require 'company-tern)
+(require 'company-tern)
 
-;; (add-to-list 'company-backends 'company-tern)
-(add-hook 'js2-mode-hook (lambda ()
-                           ;; (tern-mode)
-                           (company-mode)))
-(add-hook 'rjsx-mode-hook (lambda ()
-                           ;; (tern-mode)
-                           (company-mode)))
+(add-to-list 'company-backends 'company-tern)
+(setq company-idle-delay 0)  ;; tern doesn't accept nil as a value! http://disq.us/p/1o3j7lw
 
-;; (add-hook 'js-mode-hook (lambda () (tern-mode t)))
 (add-hook 'after-init-hook 'global-company-mode)
-(define-key company-active-map (kbd "TAB") 'company-abort)
-(define-key company-active-map (kbd "<tab>") 'company-abort)
-(define-key company-active-map (kbd "SPC") 'company-complete-common)
-(define-key company-active-map (kbd "<space>") 'company-complete-common)
+(define-key company-active-map (kbd "TAB") 'company-complete-common)
+(define-key company-active-map (kbd "<tab>") 'company-complete-common)
+(define-key company-active-map (kbd "SPC") 'company-abort)
+(define-key company-active-map (kbd "<space>") 'company-abort)
 
 ;;;;;;;;;;;;;;;;;;;
 ;; Shell options ;;
@@ -173,26 +167,55 @@
   (when (file-exists-p host-file-el)
     (load-file host-file-el))
   )
-;; git
+;; GIT
 (require 'magit)
-;; js-mode
+;; JAVASCRIPT
+(require 'js2-mode)
+(eval-after-load 'js2-mode
+  '(setq-default js-indent-level 2) ;; set indenting to 2 spaces
+  )
+
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+(add-to-list 'interpreter-mode-alist '("node" . js2-mode))
+(add-to-list 'interpreter-mode-alist '("nodejs" . js2-mode))
+
 (require 'rjsx-mode)
 (add-to-list 'auto-mode-alist '("components\\/.*\\.js\\'" . rjsx-mode))
-(add-to-list 'interpreter-mode-alist '("node" . js2-jsx-mode))
 
-;; Better imenu
-(add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
+(require 'js2-refactor)
+(require 'xref-js2)
+
+(add-hook 'js2-mode-hook (lambda ()
+                           ;; (setq js-indent-level 2)
+                           (js2-refactor-mode)
+                           (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t)
+                           (tern-mode)
+                           (company-mode)
+                           (js2-imenu-extras-mode)) ;; Better imenu
+(js2r-add-keybindings-with-prefix "C-c C-r")
+(define-key js2-mode-map (kbd "C-k") #'js2r-kill)
+;; js-mode (which js2 is based on) binds "M-." which conflicts with xref, so
+;; unbind it.
+(define-key js-mode-map (kbd "M-.") nil)
+
+(add-hook 'rjsx-mode-hook (lambda ()
+                            (js2-refactor-mode)
+                            (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t)
+                            (tern-mode)
+                            (company-mode)
+                            (js2-imenu-extras-mode))) ;; Better imenu
 
 (add-hook 'json-mode-hook 'hs-minor-mode)
 (add-hook 'js-mode-hook 'hs-minor-mode)
 (add-hook 'js-mode-hook 'js2-minor-mode)  ;; ---
-(setq-default js-indent-level 2)
 
 ;; Indium
 (require 'indium)
-(add-hook 'js-mode-hook #'indium-interaction-mode)
+(add-hook 'rjsx-mode-hook #'indium-interaction-mode)
+
 ;; Linting
 (add-hook 'after-init-hook #'global-flycheck-mode)
+
 ;; Misc
 (add-to-list 'auto-mode-alist '("\\*node process\\*" . shell-mode))
 (add-to-list 'auto-mode-alist '("\\.less?\\'" . css-mode))
@@ -274,10 +297,14 @@
                 '((c-mode "{" "}" "/[*/]" nil nil)
                   (c++-mode "{" "}" "/[*/]" nil nil)
                   (java-mode "{" "}" "/[*/]" nil nil)
-                  (js-mode "{" "}" "/[*/]" nil)
-                  (jsx-mode "{" "}" "/[*/]" "<*>*<\*>" nil)
+                  (js2-mode "{" "}" "/[*/]" nil)
+                  (rjsx-mode "{" "}" "/[*/]" "<*>*<\*>" nil)
                   (json-mode "{" "}" "/[*/]" nil)
-                  (javascript-mode  "{" "}" "/[*/]" nil)))))
+                  ;; (javascript-mode  "{" "}" "/[*/]" nil)
+                  )
+                )
+        )
+  )
 
 ;; Markdown mode
 ;; (autoload 'markdown-mode "markdown-mode"
@@ -300,8 +327,8 @@
   ;; :init (setq-default 0blayout-default "my-layout-name")
 
   ;; Load the mode
-  :config (0blayout-mode t))
+  :config (0blayout-mode t)
+  )
 
 
-(provide 'init)
-;;; init.el ends here
+(provide 'init) ;;; init.el ends here
