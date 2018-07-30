@@ -17,7 +17,12 @@
  '(ansi-color-names-vector
    ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
  '(company-auto-complete t)
- '(company-auto-complete-chars (quote (32 40 41 46 34 36 39 60 62 47)))
+ '(company-auto-complete-chars (quote (32 40 41 34 36 39)))
+ '(company-backends
+   (quote
+    (company-tern company-capf company-files
+                  (company-dabbrev-code company-gtags company-etags company-keywords)
+                  company-semantic company-css company-dabbrev company-clang company-cmake)))
  '(company-minimum-prefix-length 1)
  '(company-tooltip-limit 5)
  '(custom-enabled-themes (quote (wheatgrass)))
@@ -191,7 +196,7 @@
                            (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t)
                            (tern-mode)
                            (company-mode)
-                           (js2-imenu-extras-mode)) ;; Better imenu
+                           (js2-imenu-extras-mode))) ;; Better imenu
 (js2r-add-keybindings-with-prefix "C-c C-r")
 (define-key js2-mode-map (kbd "C-k") #'js2r-kill)
 ;; js-mode (which js2 is based on) binds "M-." which conflicts with xref, so
@@ -329,6 +334,5 @@
   ;; Load the mode
   :config (0blayout-mode t)
   )
-
-
-(provide 'init) ;;; init.el ends here
+(provide 'init)
+;;; init.el ends here
