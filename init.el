@@ -7,6 +7,9 @@
 ;;; Code:
 (package-initialize)
 
+;; DEBUGGING INIT
+;; (setq exec-path-from-shell-debug t)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -16,42 +19,34 @@
    [default default default italic underline success warning error])
  '(ansi-color-names-vector
    ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
- '(company-auto-complete t)
- '(company-auto-complete-chars (quote (32 40 41 34 36 39)))
- '(company-backends
-   (quote
-    (company-tern company-capf company-files
-                  (company-dabbrev-code company-gtags company-etags company-keywords)
-                  company-semantic company-css company-dabbrev company-clang company-cmake)))
- '(company-minimum-prefix-length 1)
- '(company-tooltip-limit 5)
  '(custom-enabled-themes (quote (wheatgrass)))
+ '(dabbrev-upcase-means-case-search t)
  '(dired-listing-switches "-al")
  '(ediff-window-setup-function (quote ediff-setup-windows-plain))
  '(ispell-extra-args (quote ("-C")))
  '(ispell-following-word t)
  '(ispell-help-in-bufferp (quote electric))
- '(ispell-program-name "/usr/local/Cellar/ispell/3.4.00/bin/ispell" t)
+ '(ispell-program-name "/usr/local/Cellar/ispell/3.4.00/bin/ispell")
  '(ispell-silently-savep t)
  '(ispell-use-framepop-p t)
- '(js-expr-indent-offset 0)
- '(js-flat-functions t)
- '(js-switch-indent-offset 2)
- '(js2-bounce-indent-p nil)
- '(js2-include-browser-externs t)
+ '(js-indent-level 2)
+ '(js2-bounce-indent-p t)
  '(js2-include-node-externs t)
  '(js2-missing-semi-one-line-override t)
- '(js2-mode-indent-ignore-first-tab t)
  '(js2-strict-missing-semi-warning nil)
+ '(js2-strict-trailing-comma-warning nil)
  '(package-archives
    (quote
     (("gnu" . "http://elpa.gnu.org/packages/")
      ("melpa" . "http://melpa.org/packages/"))))
  '(package-selected-packages
    (quote
-    (company-tern use-package 0blayout javadoc-lookup maven-test-mode mvn scala-mode vlf logview js2-refactor projectile-speedbar rjsx-mode gh-md flycheck pomidor all-the-icons all-the-icons-dired exec-path-from-shell indium projectile nvm web-mode company json-mode js2-mode yasnippet org magit ##)))
+    (js-mode ac-js2 skewer-mode coffee-mode yasnippet-classic-snippets emojify markdown-mode markdown-mode+ use-package 0blayout javadoc-lookup maven-test-mode mvn scala-mode vlf logview js2-refactor projectile-speedbar rjsx-mode gh-md flycheck pomidor all-the-icons all-the-icons-dired exec-path-from-shell indium projectile nvm web-mode company json-mode js2-mode yasnippet org magit ##)))
  '(prog-mode-hook (quote (linum-mode prettify-symbols-mode)))
  '(projectile-globally-ignored-files (quote ("TAGS")))
+ '(safe-local-variable-values
+   (quote
+    ((projectile-globally-ignored-files "npm-shrinkwrap.json" "build/*" "lib/raphael-min.js"))))
  '(show-paren-mode t)
  '(speedbar-after-create-hook (quote (speedbar-frame-reposition-smartly)))
  '(speedbar-default-position (quote left))
@@ -71,7 +66,9 @@
  ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :background "black" :foreground "wheat" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight light :height 110 :width normal :foundry "nil" :family "PT Mono"))))
  '(fringe ((t nil)))
- '(js2-warning ((t (:underline (:color "gray30" :style wave)))))
+ '(js2-external-variable ((t (:foreground "orange" :underline (:color foreground-color :style wave)))))
+ '(js2-function-call ((t (:inherit default :foreground "DarkOrange2"))))
+ '(js2-warning ((t (:underline (:color "OrangeRed1" :style wave)))))
  '(speedbar-button-face ((t (:foreground "green3" :height 0.9))))
  '(speedbar-directory-face ((t (:foreground "light blue" :height 0.9 :width extra-expanded))))
  '(speedbar-file-face ((t (:foreground "cyan" :height 0.9 :width extra-expanded))))
@@ -89,6 +86,12 @@
 ;; ;; For important compatibility libraries like cl-lib
 ;;  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
 ;;;; (package-initialize) ;; You might already have this line
+(add-to-list 'load-path "linting.el")
+(add-to-list 'load-path "completions.el")
+(add-to-list 'load-path "javascript.el")
+
+(defalias 'yes-or-no-p 'y-or-n-p)  ;; Make the "yes or no" prompt shorter
+(setq exec-path-from-shell-arguments '("-i")) ;; avoid message that PATH is modified in .bashrc file when opening from shell
 
 (setq-default inhibit-startup-screen t)
 (setq-default indent-tabs-mode nil)
@@ -115,35 +118,19 @@
 (require 'all-the-icons)
 (require 'all-the-icons-dired)
 (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+;; For error "ls does not support --dired; see ‘dired-use-ls-dired’ for more details." see
+;; https://stackoverflow.com/a/4081094, and install coreutils via Homebrew then link gls to ls
 ;; RE-builder
 (require 're-builder)
 (setq reb-re-syntax 'string)
 ;;
 (add-to-list 'load-path (expand-file-name "local" user-emacs-directory))
 
-;; Swagger
-(require 'swagger-mode)
-(require 'yaml-mode)
-
 ;;; Cucumber
-(add-to-list 'load-path (expand-file-name "local/cucumber.el" user-emacs-directory))
-(require 'feature-mode)
-(setq feature-default-language "fi")
-(add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
-
-;; complete anything
-(add-to-list 'load-path "/Users/dwelc/.nvm/versions/node/v8.6.0/lib/node_modules/tern/emacs")
-(require 'company)
-(require 'company-tern)
-
-(add-to-list 'company-backends 'company-tern)
-(setq company-idle-delay 0)  ;; tern doesn't accept nil as a value! http://disq.us/p/1o3j7lw
-
-(add-hook 'after-init-hook 'global-company-mode)
-(define-key company-active-map (kbd "TAB") 'company-complete-common)
-(define-key company-active-map (kbd "<tab>") 'company-complete-common)
-(define-key company-active-map (kbd "SPC") 'company-abort)
-(define-key company-active-map (kbd "<space>") 'company-abort)
+;; (add-to-list 'load-path (expand-file-name "local/cucumber.el" user-emacs-directory))
+;; (require 'feature-mode)
+;; (setq feature-default-language "fi")
+;; (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
 
 ;;;;;;;;;;;;;;;;;;;
 ;; Shell options ;;
@@ -174,55 +161,8 @@
   )
 ;; GIT
 (require 'magit)
-;; JAVASCRIPT
-(require 'js2-mode)
-(eval-after-load 'js2-mode
-  '(setq-default js-indent-level 2) ;; set indenting to 2 spaces
-  )
 
-(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-(add-to-list 'interpreter-mode-alist '("node" . js2-mode))
-(add-to-list 'interpreter-mode-alist '("nodejs" . js2-mode))
-
-(require 'rjsx-mode)
-(add-to-list 'auto-mode-alist '("components\\/.*\\.js\\'" . rjsx-mode))
-
-(require 'js2-refactor)
-(require 'xref-js2)
-
-(add-hook 'js2-mode-hook (lambda ()
-                           ;; (setq js-indent-level 2)
-                           (js2-refactor-mode)
-                           (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t)
-                           (tern-mode)
-                           (company-mode)
-                           (js2-imenu-extras-mode))) ;; Better imenu
-(js2r-add-keybindings-with-prefix "C-c C-r")
-(define-key js2-mode-map (kbd "C-k") #'js2r-kill)
-;; js-mode (which js2 is based on) binds "M-." which conflicts with xref, so
-;; unbind it.
-(define-key js-mode-map (kbd "M-.") nil)
-
-(add-hook 'rjsx-mode-hook (lambda ()
-                            (js2-refactor-mode)
-                            (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t)
-                            (tern-mode)
-                            (company-mode)
-                            (js2-imenu-extras-mode))) ;; Better imenu
-
-(add-hook 'json-mode-hook 'hs-minor-mode)
-(add-hook 'js-mode-hook 'hs-minor-mode)
-(add-hook 'js-mode-hook 'js2-minor-mode)  ;; ---
-
-;; Indium
-(require 'indium)
-(add-hook 'rjsx-mode-hook #'indium-interaction-mode)
-
-;; Linting
-(add-hook 'after-init-hook #'global-flycheck-mode)
-
-;; Misc
-(add-to-list 'auto-mode-alist '("\\*node process\\*" . shell-mode))
+(add-to-list 'load-path "javascript.el")
 (add-to-list 'auto-mode-alist '("\\.less?\\'" . css-mode))
 
 ;; Pomidoro
@@ -231,6 +171,9 @@
 
 ;; Project management
 (require 'projectile)
+(projectile-mode +1)
+(define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 ;;; Ignore these files/directories
 (add-to-list 'projectile-globally-ignored-files ".DS_Store")
 (add-to-list 'projectile-globally-ignored-files "isolate-*.log")
