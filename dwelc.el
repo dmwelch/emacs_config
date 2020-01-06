@@ -1,5 +1,4 @@
 (require 'package) ;; You might already have this line
-;; Use the bleeding edge packages (for Jade)
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/"))
 (when (< emacs-major-version 24)
@@ -8,5 +7,5 @@
 ;; (package-initialize) ;; You might already have this line
 
 ;;
-(starter-kit-load "js")
+;; (starter-kit-load "js")
 (starter-kit-load "python")

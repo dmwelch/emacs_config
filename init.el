@@ -8,7 +8,7 @@
 (package-initialize)
 
 ;; DEBUGGING INIT
-;; (setq exec-path-from-shell-debug t)
+(setq exec-path-from-shell-debug t)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -29,21 +29,23 @@
  '(ispell-program-name "/usr/local/Cellar/ispell/3.4.00/bin/ispell")
  '(ispell-silently-savep t)
  '(ispell-use-framepop-p t)
- '(js-indent-level 2)
- '(js2-bounce-indent-p t)
- '(js2-include-node-externs t)
- '(js2-missing-semi-one-line-override t)
- '(js2-strict-missing-semi-warning nil)
- '(js2-strict-trailing-comma-warning nil)
  '(package-archives
    (quote
     (("gnu" . "http://elpa.gnu.org/packages/")
      ("melpa" . "http://melpa.org/packages/"))))
  '(package-selected-packages
    (quote
-    (js-mode ac-js2 skewer-mode coffee-mode yasnippet-classic-snippets emojify markdown-mode markdown-mode+ use-package 0blayout javadoc-lookup maven-test-mode mvn scala-mode vlf logview js2-refactor projectile-speedbar rjsx-mode gh-md flycheck pomidor all-the-icons all-the-icons-dired exec-path-from-shell indium projectile nvm web-mode company json-mode js2-mode yasnippet org magit ##)))
+    (tern-auto-complete company-tern add-node-modules-path eslintd-fix prettier-js js-mode ac-js2 skewer-mode coffee-mode yasnippet-classic-snippets emojify markdown-mode markdown-mode+ use-package 0blayout javadoc-lookup maven-test-mode mvn scala-mode vlf logview js2-refactor projectile-speedbar rjsx-mode gh-md flycheck pomidor all-the-icons all-the-icons-dired exec-path-from-shell indium projectile nvm web-mode company json-mode js2-mode yasnippet org magit ##)))
  '(prog-mode-hook (quote (linum-mode prettify-symbols-mode)))
  '(projectile-globally-ignored-files (quote ("TAGS")))
+ '(python-check-buffer-name "*Flake8 check: %s*")
+ '(python-check-command "flake8")
+ '(python-fill-docstring-style (quote django))
+ '(python-indent-guess-indent-offset nil)
+ '(python-shell-completion-native-output-timeout 1.0)
+ '(python-shell-exec-path (quote ("/usr/local/bin/python3")))
+ '(python-shell-interpreter "python3")
+ '(python-skeleton-autoinsert t)
  '(safe-local-variable-values
    (quote
     ((projectile-globally-ignored-files "npm-shrinkwrap.json" "build/*" "lib/raphael-min.js"))))
@@ -86,12 +88,19 @@
 ;; ;; For important compatibility libraries like cl-lib
 ;;  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
 ;;;; (package-initialize) ;; You might already have this line
+;; if you have a host-specific .el file, load it
+(let ((host-file-el (format "~/.emacs.d/%s.el" system-name)))  ;; using ${HOME} breaks the file-exists-p... why?  ;; use user-emacs-directory instead?
+  (when (file-exists-p host-file-el)
+    (load-file host-file-el)
+    )
+  )
+
 (add-to-list 'load-path "linting.el")
 (add-to-list 'load-path "completions.el")
 (add-to-list 'load-path "javascript.el")
 
 (defalias 'yes-or-no-p 'y-or-n-p)  ;; Make the "yes or no" prompt shorter
-(setq exec-path-from-shell-arguments '("-i")) ;; avoid message that PATH is modified in .bashrc file when opening from shell
+;; (setq exec-path-from-shell-arguments '("-i")) ;; avoid message that PATH is modified in .bashrc file when opening from shell
 
 (setq-default inhibit-startup-screen t)
 (setq-default indent-tabs-mode nil)
@@ -126,6 +135,8 @@
 ;;
 (add-to-list 'load-path (expand-file-name "local" user-emacs-directory))
 
+;; (add-hook 'after-init-hook 'global-company-mode)
+
 ;;; Cucumber
 ;; (add-to-list 'load-path (expand-file-name "local/cucumber.el" user-emacs-directory))
 ;; (require 'feature-mode)
@@ -154,16 +165,9 @@
 (setq electric-pair-mode t)
 (setq electric-quote-mode t)
 
-;; if you have a host-specific .el file, load it
-(let ((host-file-el (format "~/.emacs.d/%s.el" system-name)))  ;; using ${HOME} breaks the file-exists-p... why?  ;; use user-emacs-directory instead?
-  (when (file-exists-p host-file-el)
-    (load-file host-file-el))
-  )
+
 ;; GIT
 (require 'magit)
-
-(add-to-list 'load-path "javascript.el")
-(add-to-list 'auto-mode-alist '("\\.less?\\'" . css-mode))
 
 ;; Pomidoro
 (require 'pomidor)
@@ -196,41 +200,44 @@
                   ;; :test-dir "test*")
 
 ;; Speedbar
-(require 'sr-speedbar)
-;; fix so speedbar is in same window
-(with-eval-after-load "speedbar"
-  (autoload 'sr-speedbar-toggle "sr-speedbar" nil t)
-  (global-set-key (kbd "s-s") 'sr-speedbar-toggle)
+(use-package sr-speedbar
+  ;;; https://gist.github.com/cstrahan/1975217
+  :config
+  (setq speedbar-frame-parameters
+        '((minibuffer)
+          (width . 40)
+          (border-width . 0)
+          (menu-bar-lines . 0)
+          (tool-bar-lines . 0)
+          (unsplittable . t)
+          (left-fringe . 0)))
+  (setq speedbar-hide-button-brackets-flag t)
+  (setq speedbar-show-unknown-files t)
+  (setq speedbar-smart-directory-expand-flag t)
+  (setq speedbar-use-images nil)
+  (setq sr-speedbar-auto-refresh nil)
+  (setq sr-speedbar-max-width 70)
+  (setq sr-speedbar-right-side nil)
+  (setq sr-speedbar-width-console 40)
+  ;; fix so speedbar is in same window
+  :init
+  (with-eval-after-load "speedbar"
+    (autoload 'sr-speedbar-toggle "sr-speedbar" nil t)
+    (global-set-key (kbd "s-s") 'sr-speedbar-toggle)
+    )
+  (when window-system
+    (defadvice sr-speedbar-open (after sr-speedbar-open-resize-frame activate)
+      (set-frame-width (selected-frame)
+                       (+ (frame-width) sr-speedbar-width)))
+    (ad-enable-advice 'sr-speedbar-open 'after 'sr-speedbar-open-resize-frame)
+
+    (defadvice sr-speedbar-close (after sr-speedbar-close-resize-frame activate)
+      (sr-speedbar-recalculate-width)
+      (set-frame-width (selected-frame)
+                       (- (frame-width) sr-speedbar-width)))
+    (ad-enable-advice 'sr-speedbar-close 'after 'sr-speedbar-close-resize-frame))
+
   )
-;;; https://gist.github.com/cstrahan/1975217
-(setq speedbar-frame-parameters
-      '((minibuffer)
-        (width . 40)
-        (border-width . 0)
-        (menu-bar-lines . 0)
-        (tool-bar-lines . 0)
-        (unsplittable . t)
-        (left-fringe . 0)))
-(setq speedbar-hide-button-brackets-flag t)
-(setq speedbar-show-unknown-files t)
-(setq speedbar-smart-directory-expand-flag t)
-(setq speedbar-use-images nil)
-(setq sr-speedbar-auto-refresh nil)
-(setq sr-speedbar-max-width 70)
-(setq sr-speedbar-right-side nil)
-(setq sr-speedbar-width-console 40)
-
-(when window-system
-  (defadvice sr-speedbar-open (after sr-speedbar-open-resize-frame activate)
-    (set-frame-width (selected-frame)
-                     (+ (frame-width) sr-speedbar-width)))
-  (ad-enable-advice 'sr-speedbar-open 'after 'sr-speedbar-open-resize-frame)
-
-  (defadvice sr-speedbar-close (after sr-speedbar-close-resize-frame activate)
-    (sr-speedbar-recalculate-width)
-    (set-frame-width (selected-frame)
-                     (- (frame-width) sr-speedbar-width)))
-  (ad-enable-advice 'sr-speedbar-close 'after 'sr-speedbar-close-resize-frame))
 
 ;; https://writequit.org/articles/working-with-logs-in-emacs.html
 (use-package hideshow
@@ -248,7 +255,6 @@
                   (js2-mode "{" "}" "/[*/]" nil)
                   (rjsx-mode "{" "}" "/[*/]" "<*>*<\*>" nil)
                   (json-mode "{" "}" "/[*/]" nil)
-                  ;; (javascript-mode  "{" "}" "/[*/]" nil)
                   )
                 )
         )
@@ -277,5 +283,6 @@
   ;; Load the mode
   :config (0blayout-mode t)
   )
+
 (provide 'init)
 ;;; init.el ends here
