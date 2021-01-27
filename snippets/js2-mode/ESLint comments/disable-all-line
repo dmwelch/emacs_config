@@ -1,0 +1,7 @@
+# -*- coding: utf-8; mode: snippet -*-
+# name: Disable all rules (line)
+# key: eslfda
+# group: Eslint
+# contributor: Dave Welch <david.m.welch AT gmail>
+# --
+// eslint-disable-line

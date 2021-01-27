@@ -8,4 +8,4 @@
 
 ;;
 ;; (starter-kit-load "js")
-(starter-kit-load "python")
+;; (starter-kit-load "python")

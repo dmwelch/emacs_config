@@ -9,7 +9,7 @@
   :ensure t
   :init (global-company-mode)
   :custom ((company-backends
-            (quote 
+            (quote
              (
               (company-dabbrev-code
                company-keywords)  ;; merged backends
@@ -26,3 +26,6 @@
   :bind (("C-<tab>" . company-complete-common)
          ("C-<space>" . company-abort))
   )
+
+(provide 'config_completions)
+;;; config_completions ends here

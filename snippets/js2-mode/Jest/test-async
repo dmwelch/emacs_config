@@ -1,0 +1,13 @@
+# -*- coding: utf-8; mode: snippet -*-
+# name: async test
+# key: jtestas
+# contributor: Dave Welch (david DOT m DOT welch AT gmail)
+# --
+test('$1', async () => {
+  // arrange
+  $2
+  // act
+  $3
+  // assert
+  expect($4).$5($6)
+})

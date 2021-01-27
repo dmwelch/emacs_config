@@ -1,0 +1,9 @@
+# -*- coding: utf-8; mode: snippet -*-
+# name: Disable all rules (section)
+# key: eslsda
+# group: Eslint
+# contributor: Dave Welch <david.m.welch AT gmail>
+# --
+/* eslint-disable */
+$0
+/* eslint-enable */

@@ -1,0 +1,7 @@
+# -*- coding: utf-8; mode: snippet -*-
+# name: Disable all rules (next line)
+# key: eslldna
+# group: Eslint
+# contributor: Dave Welch <david.m.welch AT gmail>
+# --
+// eslint-disable-next-line

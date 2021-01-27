@@ -1,0 +1,8 @@
+# -*- coding: utf-8; mode: snippet -*-
+# name: afterAll
+# key: jaa
+# contributor: Dave Welch (david DOT m DOT welch AT gmail)
+# --
+afterAll(() => {
+  $0
+})

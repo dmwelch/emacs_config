@@ -1,0 +1,13 @@
+# -*- coding: utf-8; mode: snippet -*-
+# name: test
+# key: jtest
+# contributor: Dave Welch (david DOT m DOT welch AT gmail)
+# --
+test('$1', () => {
+  // arrange
+  $2
+  // act
+  $3
+  // assert
+  expect($4).$5($6)
+})

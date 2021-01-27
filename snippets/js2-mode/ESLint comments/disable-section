@@ -1,0 +1,9 @@
+# -*- coding: utf-8; mode: snippet -*-
+# name: Disable specific rules (section)
+# key: eslsd
+# group: Eslint
+# contributor: Dave Welch <david.m.welch AT gmail>
+# --
+/* eslint-disable ${2:$$(yas-choose-value '("no-unused-vars" "react/jsx-props-no-spreading"))} */
+$0
+/* eslint-enable $2 */
